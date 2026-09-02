@@ -25,22 +25,41 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = blogPosts.find((p) => p.slug === slug);
   if (!post) return {};
 
-  const baseUrl = process.env.NEXT_PUBLIC_HOST_URL || "https://natureofthedivine.com";
+  const baseUrl =
+    process.env.NEXT_PUBLIC_HOST_URL || "https://natureofthedivine.com";
+  const canonical = `${baseUrl}/blog/${post.slug}`;
 
   return {
     title: `${post.title} | Nature of the Divine Blog`,
     description: post.excerpt,
     keywords: post.keywords,
     alternates: {
-      canonical: `/blog/${post.slug}`,
+      canonical,
     },
+    authors: [{ name: SITE.author }],
     openGraph: {
       title: `${post.title} | Nature of the Divine`,
       description: post.excerpt,
       type: "article",
-      url: `/blog/${post.slug}`,
-      images: [{ url: post.coverImage, alt: post.title }],
+      url: canonical,
+      images: [
+        {
+          url: post.coverImage,
+          alt: `${post.title} — Nature of the Divine`,
+          width: 1200,
+          height: 675,
+        },
+      ],
       siteName: "Nature of the Divine",
+      publishedTime: post.date,
+      authors: [SITE.author],
+      tags: post.keywords,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${post.title} | Nature of the Divine`,
+      description: post.excerpt,
+      images: [post.coverImage],
     },
   };
 }
@@ -50,6 +69,8 @@ export default async function BlogPostPage({ params }: Props) {
   const post = blogPosts.find((p) => p.slug === slug);
   if (!post) notFound();
 
+  const baseUrl =
+    process.env.NEXT_PUBLIC_HOST_URL || "https://natureofthedivine.com";
   const relatedChapters = allChapters.slice(0, 3);
 
   const articleSchema = {
@@ -59,10 +80,16 @@ export default async function BlogPostPage({ params }: Props) {
     description: post.excerpt,
     image: post.coverImage,
     datePublished: post.date,
+    dateModified: post.date,
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${baseUrl}/blog/${post.slug}`,
+    },
     isPartOf: { "@type": "Blog", name: "Reflections on the Divine" },
     author: { "@type": "Person", name: SITE.author },
     publisher: { "@type": "Organization", name: SCHEMA.publisher },
     articleSection: post.category,
+    keywords: post.keywords?.join(", "),
     inLanguage: "en",
   };
 
@@ -95,12 +122,19 @@ export default async function BlogPostPage({ params }: Props) {
       </section>
 
       {/* Hero image */}
-      <div className="relative aspect-[21/9] w-full">
-        <Image src={post.coverImage} alt={post.title} fill priority className="object-cover" />
+      <div className="relative aspect-[16/9] sm:aspect-[21/9] w-full">
+        <Image
+          src={post.coverImage}
+          alt={post.title}
+          fill
+          priority
+          sizes="(max-width: 768px) 100vw, 1600px"
+          className="object-cover"
+        />
       </div>
 
       {/* Body */}
-      <section className="py-12 md:py-16">
+      <section className="py-10 md:py-16">
         <div className="container mx-auto px-4 max-w-6xl flex flex-col lg:flex-row gap-10">
           <div className="flex-1 min-w-0 max-w-2xl mx-auto lg:mx-0 w-full">
             <div className="prose prose-slate max-w-none">
