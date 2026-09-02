@@ -7,8 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ArrowRight, Truck, CreditCard, Book, Tag, ArrowLeft, User, MapPin, BadgePercent, Ship, ShoppingCart, Package } from 'lucide-react';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Loader2, ArrowRight, Truck, User, BadgePercent, Ship, ShoppingCart, Package, Book } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { Stock, BookVariant, OrderItem, OrderItemStatus } from '@/lib/definitions';
@@ -215,7 +214,7 @@ export function OrderForm({ stock, settings }: { stock: Stock, settings: SiteSet
         }
     }, [searchParams, router]);
 
-    const handleNextStep = () => {
+    const handleNextStep = async () => {
         if (state.step === 'details') {
             const result = DetailsSchema.safeParse(state.details);
             if (!result.success) {
@@ -229,9 +228,46 @@ export function OrderForm({ stock, settings }: { stock: Stock, settings: SiteSet
                 return;
             }
             calculateTotal();
+            await placeOrderNow();
         }
-        trackEvent('checkout_payment_entered');
-        dispatch({ type: 'NEXT_STEP' });
+    };
+
+    const placeOrderNow = async () => {
+        setIsSubmitting(true);
+        dispatch({ type: 'SET_PROCESSING' });
+
+        try {
+            const payload = {
+                ...state.details,
+                items: state.items,
+                discountCode: state.discount.applied ? state.discount.code : undefined,
+                paymentMethod: 'prepaid',
+            };
+
+            const result = await placeOrder(payload as any);
+            if (result.success) {
+                if (result.paymentData?.redirectUrl) {
+                    window.location.href = result.paymentData.redirectUrl;
+                } else {
+                    router.push(`/ticket/${result.orderId}?success=true`);
+                }
+            } else {
+                toast({
+                    variant: 'destructive',
+                    title: 'Order Failed',
+                    description: result.message
+                });
+                dispatch({ type: 'PREVIOUS_STEP' });
+            }
+        } catch (e: any) {
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: e.message || 'An unexpected error occurred.'
+            });
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const calculateTotal = async () => {
@@ -280,53 +316,6 @@ export function OrderForm({ stock, settings }: { stock: Stock, settings: SiteSet
         }
     };
 
-    const handlePlaceOrder = async () => {
-        if (!state.paymentMethod) {
-            toast({
-                variant: 'destructive',
-                title: 'Payment Method Required',
-                description: 'Please select a payment method.'
-            });
-            return;
-        }
-
-        setIsSubmitting(true);
-        dispatch({ type: 'SET_PROCESSING' });
-
-        try {
-            const payload = {
-                ...state.details,
-                items: state.items,
-                discountCode: state.discount.applied ? state.discount.code : undefined,
-                paymentMethod: state.paymentMethod,
-            };
-
-            const result = await placeOrder(payload as any);
-            if (result.success) {
-                if (result.paymentData?.redirectUrl) {
-                    window.location.href = result.paymentData.redirectUrl;
-                } else {
-                    router.push(`/ticket/${result.orderId}?success=true`);
-                }
-            } else {
-                toast({
-                    variant: 'destructive',
-                    title: 'Order Failed',
-                    description: result.message
-                });
-                dispatch({ type: 'NEXT_STEP' }); // Go back to payment step
-            }
-        } catch (e: any) {
-            toast({
-                variant: 'destructive',
-                title: 'Error',
-                description: e.message || 'An unexpected error occurred.'
-            });
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
     if (isVerifying) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
@@ -345,25 +334,12 @@ export function OrderForm({ stock, settings }: { stock: Stock, settings: SiteSet
                 
                 {/* Step Indicators */}
                 <div className="flex items-center gap-4 mb-8">
-                    {['Details', 'Payment'].map((step, idx) => (
-                        <div key={step} className="flex items-center gap-2">
-                            <div className={cn(
-                                "h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold transition-all",
-                                (idx === 0 && state.step === 'details') || (idx === 1 && state.step === 'payment')
-                                    ? "bg-primary text-white ring-4 ring-primary/20"
-                                    : "bg-slate-200 text-slate-500"
-                            )}>
-                                {idx + 1}
-                            </div>
-                            <span className={cn(
-                                "text-sm font-medium",
-                                (idx === 0 && state.step === 'details') || (idx === 1 && state.step === 'payment')
-                                    ? "text-slate-900"
-                                    : "text-slate-400"
-                            )}>{step}</span>
-                            {idx < 1 && <div className="w-12 h-[2px] bg-slate-200 ml-2" />}
+                    <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold bg-primary text-white ring-4 ring-primary/20">
+                            1
                         </div>
-                    ))}
+                        <span className="text-sm font-medium text-slate-900">Details</span>
+                    </div>
                 </div>
 
                 {state.step === 'details' && (
@@ -468,73 +444,9 @@ export function OrderForm({ stock, settings }: { stock: Stock, settings: SiteSet
                                 </div>
                             </div>
 
-                            <Button onClick={handleNextStep} className="w-full h-14 rounded-2xl text-lg font-bold shadow-lg shadow-primary/20">
-                                Continue to Payment <ArrowRight className="ml-2 h-5 w-5" />
+                            <Button onClick={handleNextStep} disabled={isSubmitting} className="w-full h-14 rounded-2xl text-lg font-bold shadow-lg shadow-primary/20">
+                                {isSubmitting ? <Loader2 className="h-6 w-6 animate-spin" /> : <>Proceed to Payment <ArrowRight className="ml-2 h-5 w-5" /></>}
                             </Button>
-                        </CardContent>
-                    </Card>
-                )}
-
-                {state.step === 'payment' && (
-                    <Card className="border-none shadow-xl bg-white/80 backdrop-blur rounded-3xl overflow-hidden animate-in slide-in-from-right-4 duration-300">
-                        <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-8">
-                            <div className="flex items-center justify-between">
-                                <CardTitle className="text-2xl font-headline flex items-center gap-3">
-                                    <CreditCard className="h-6 w-6 text-primary" /> Payment Method
-                                </CardTitle>
-                                <Button variant="ghost" size="sm" onClick={() => dispatch({ type: 'PREVIOUS_STEP' })} className="text-muted-foreground hover:text-primary">
-                                    <ArrowLeft className="h-4 w-4 mr-2" /> Back
-                                </Button>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="p-8 space-y-8">
-                             <RadioGroup 
-                                value={state.paymentMethod || ''} 
-                                onValueChange={(v) => dispatch({ type: 'SET_PAYMENT_METHOD', payload: v as any })}
-                                className="grid grid-cols-1 md:grid-cols-2 gap-4"
-                             >
-                                <div className={cn(
-                                    "relative flex items-center justify-between p-6 rounded-2xl border-2 transition-all cursor-pointer",
-                                    state.paymentMethod === 'prepaid' ? "border-primary bg-primary/5 ring-4 ring-primary/5" : "border-slate-100 hover:border-slate-200 bg-white"
-                                )}>
-                                    <div className="flex items-center gap-4">
-                                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                                            <CreditCard className="h-5 w-5" />
-                                        </div>
-                                        <div>
-                                            <p className="font-bold">Online Payment</p>
-                                            <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Cards, UPI, NetBanking</p>
-                                        </div>
-                                    </div>
-                                    <RadioGroupItem value="prepaid" id="prepaid" className="sr-only" />
-                                    {state.paymentMethod === 'prepaid' && <div className="h-2 w-2 rounded-full bg-primary" />}
-                                </div>
-
-                                <div className={cn(
-                                    "relative flex items-center justify-between p-6 rounded-2xl border-2 transition-all cursor-pointer",
-                                    state.paymentMethod === 'cod' ? "border-primary bg-primary/5 ring-4 ring-primary/5" : "border-slate-100 hover:border-slate-200 bg-white"
-                                )}>
-                                    <div className="flex items-center gap-4">
-                                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                                            <Truck className="h-5 w-5" />
-                                        </div>
-                                        <div>
-                                            <p className="font-bold">Cash on Delivery</p>
-                                            <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Pay when you receive</p>
-                                        </div>
-                                    </div>
-                                    <RadioGroupItem value="cod" id="cod" className="sr-only" />
-                                    {state.paymentMethod === 'cod' && <div className="h-2 w-2 rounded-full bg-primary" />}
-                                </div>
-                             </RadioGroup>
-
-                             <Button 
-                                onClick={handlePlaceOrder} 
-                                disabled={isSubmitting || !state.paymentMethod}
-                                className="w-full h-14 rounded-2xl text-lg font-bold shadow-lg shadow-primary/20"
-                             >
-                                {isSubmitting ? <Loader2 className="h-6 w-6 animate-spin" /> : "Complete Order"}
-                             </Button>
                         </CardContent>
                     </Card>
                 )}

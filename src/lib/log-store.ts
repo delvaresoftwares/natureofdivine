@@ -28,20 +28,26 @@ export const addLog = async (level: LogLevel, message: string, data?: any, meta?
     const headersList = await headers();
     const path = headersList.get('referer') || 'server-action';
 
-    const entry: Omit<LogEntry, 'id'> = {
+    const serializedData = data
+      ? JSON.parse(JSON.stringify(data, (key, value) =>
+          typeof value === 'object' && value !== null && 'message' in value && 'stack' in value
+            ? { message: value.message, stack: value.stack, name: value.name, code: (value as any).code }
+            : value
+        ))
+      : null;
+
+    // Build entry without undefined values — Firestore rejects undefined fields
+    const entry: Record<string, any> = {
       timestamp: Date.now(),
       level,
       message,
-      data: data ? JSON.parse(JSON.stringify(data, (key, value) => 
-        typeof value === 'object' && value !== null && 'message' in value && 'stack' in value ? 
-        { message: value.message, stack: value.stack, name: value.name, code: (value as any).code } : value
-      )) : null,
-      duration: meta?.duration,
-      status: meta?.status,
+      data: serializedData,
       userId: meta?.userId || 'system',
       path,
-      action: meta?.action
     };
+    if (meta?.duration !== undefined && meta?.duration !== null) entry.duration = meta.duration;
+    if (meta?.status !== undefined && meta?.status !== null) entry.status = meta.status;
+    if (meta?.action !== undefined && meta?.action !== null) entry.action = meta.action;
 
     // Console log for immediate server feedback
     if (level === 'error') {

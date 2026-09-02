@@ -25,6 +25,8 @@ export type ConversionFunnel = {
     totalVisitors: number;
     totalSales: number;
     totalOrders: number;
+    blogClicksTotal: number;
+    blogClicks: { slug: string; count: number }[];
 };
 
 export async function getFunnel(
@@ -78,6 +80,7 @@ export async function getFunnel(
         let paymentSuccess = 0;
         let totalSales = 0;
         let totalOrders = 0;
+        const blogClickMap: Record<string, number> = {};
 
         for (const event of events) {
             if (event.type.startsWith('page_view_') && event.metadata?.sessionId) {
@@ -94,6 +97,10 @@ export async function getFunnel(
             }
             if (event.type === 'order_placed_cod' || event.type === 'order_placed_prepaid_success') {
                 paymentSuccess++;
+            }
+            if (event.type === 'click_blog' && event.metadata?.slug) {
+                const slug = String(event.metadata.slug);
+                blogClickMap[slug] = (blogClickMap[slug] || 0) + 1;
             }
         }
 
@@ -121,6 +128,10 @@ export async function getFunnel(
             drops.push({ from, to, percent });
         }
 
+        const blogClicks = Object.entries(blogClickMap)
+            .map(([slug, count]) => ({ slug, count }))
+            .sort((a, b) => b.count - a.count);
+
         return {
             stages,
             overallConversion: awareness > 0 ? Math.round((reuse / awareness) * 100) : 0,
@@ -128,6 +139,8 @@ export async function getFunnel(
             totalVisitors: awareness,
             totalSales,
             totalOrders,
+            blogClicksTotal: blogClicks.reduce((acc, c) => acc + c.count, 0),
+            blogClicks,
         };
     } catch (error: any) {
         addLog('error', 'Failed to get funnel analytics', { message: error.message });

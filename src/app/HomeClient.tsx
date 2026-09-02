@@ -6,7 +6,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { trackEvent } from "@/lib/actions";
-import { BOOK, HOME, synopsis, authorBio, buyLinks, sampleChapters } from "@/lib/constants";
+import { BOOK, HOME, HOME_FAQ, synopsis, authorBio, buyLinks, sampleChapters } from "@/lib/constants";
 import { BookImage } from "@/components/BookImage";
 import {
   Sparkles,
@@ -18,8 +18,15 @@ import {
   ScrollText,
   Feather,
   Quote,
+  HelpCircle,
 } from "lucide-react";
 import type { SampleChapter } from "@/lib/definitions";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const FEATURE_ICONS: Record<string, typeof Star> = {
   star: Star,
@@ -195,6 +202,29 @@ export function HomeClient({ initialChapters }: { initialChapters: SampleChapter
             className="text-slate-600 leading-relaxed"
             dangerouslySetInnerHTML={{ __html: authorBio }}
           />
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="scroll-mt-24 py-20 md:py-24 border-b border-slate-200 bg-white">
+        <div className="container mx-auto px-4 max-w-3xl">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 text-primary text-xs font-bold uppercase tracking-widest mb-3">
+              <HelpCircle className="h-4 w-4" /> Frequently asked
+            </div>
+            <h2 className="text-3xl md:text-5xl font-headline mb-4">Questions about the book</h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">
+              Everything the thinking seeker usually wants to know before beginning the soul journey.
+            </p>
+          </div>
+          <Accordion type="single" collapsible className="w-full">
+            {HOME_FAQ.map((faq, index) => (
+              <AccordionItem key={index} value={`item-${index}`}>
+                <AccordionTrigger className="text-left font-headline text-lg">{faq.question}</AccordionTrigger>
+                <AccordionContent className="text-muted-foreground leading-relaxed">{faq.answer}</AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </div>
       </section>
 

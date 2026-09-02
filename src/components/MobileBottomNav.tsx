@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, BookOpen, ScrollText, Search, ShoppingBag } from 'lucide-react';
+import { Home, ScrollText, Search, ShoppingBag, Feather } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { BOTTOM_NAV } from '@/lib/constants';
@@ -19,8 +19,8 @@ export function MobileBottomNav() {
 
   const items: NavItem[] = [
     { href: '/', label: BOTTOM_NAV.home, icon: Home, match: p => p === '/' },
-    { href: '/#synopsis', label: BOTTOM_NAV.about, icon: BookOpen, match: p => p === '/#synopsis' },
-    { href: '/#chapters', label: BOTTOM_NAV.chapter, icon: ScrollText, match: p => p === '/#chapters' },
+    { href: '/chapters', label: BOTTOM_NAV.chapter, icon: ScrollText, match: p => p.startsWith('/chapters') },
+    { href: '/blog', label: BOTTOM_NAV.blog, icon: Feather, match: p => p.startsWith('/blog') },
     {
       href: '/track',
       label: BOTTOM_NAV.track,

@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { Loader2, ArrowDown, Lock, TrendingUp, Eye, MousePointerClick, MapPin, CreditCard, CheckCircle2, IndianRupee, ShoppingBag } from 'lucide-react';
+import { Loader2, ArrowDown, Lock, TrendingUp, Eye, MousePointerClick, MapPin, CreditCard, CheckCircle2, IndianRupee, ShoppingBag, Newspaper } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const STORAGE_KEY = 'notd_admin_unlocked';
@@ -247,6 +247,33 @@ function FunnelContent() {
                   </div>
                 );
               })}
+            </CardContent>
+          </Card>
+
+          {/* Blog clicks */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Newspaper className="h-5 w-5 text-primary" /> Blog Clicks
+              </CardTitle>
+              <CardDescription>
+                Total blog article views in this range: <strong className="font-bold">{data.blogClicksTotal.toLocaleString()}</strong> · sorted by most clicked
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {data.blogClicks.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No blog clicks recorded in this range yet.</p>
+              ) : (
+                <div className="space-y-2">
+                  {data.blogClicks.map((item, index) => (
+                    <div key={item.slug} className="flex items-center gap-3">
+                      <span className="w-5 text-xs font-bold text-muted-foreground">{index + 1}</span>
+                      <span className="text-sm flex-1 truncate">{item.slug}</span>
+                      <span className="font-mono font-bold text-sm">{item.count.toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </>

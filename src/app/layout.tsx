@@ -111,6 +111,8 @@ export default function RootLayout({
     bookFormat: "http://schema.org/Paperback",
     url: siteUrl,
     description: SCHEMA.description,
+    genre: SCHEMA.bookGenre,
+    audience: SCHEMA.audience,
     datePublished: SCHEMA.datePublished,
     image: `${siteUrl}/logo.svg`,
     offers: {
@@ -118,11 +120,37 @@ export default function RootLayout({
       price: BOOK.price,
       priceCurrency: BOOK.currency,
       availability: "https://schema.org/InStock",
+      url: siteUrl,
       seller: {
         "@type": "Organization",
-        name: "Flipkart",
+        name: "Nature of the Divine",
       },
     },
+  };
+
+  const webSiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE.name,
+    url: siteUrl,
+    description: META.description,
+    publisher: {
+      "@type": "Organization",
+      name: SITE.name,
+    },
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: siteUrl,
+      },
+    ],
   };
 
   return (
@@ -133,6 +161,14 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(bookSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
         />
       </head>
       <body
