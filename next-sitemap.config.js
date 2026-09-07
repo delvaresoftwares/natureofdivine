@@ -2,13 +2,23 @@
 module.exports = {
   siteUrl: "https://www.natureofthedivine.com",
   generateRobotsTxt: true,
+  generateIndexSitemap: false,
+  sitemapSize: 5000,
   changefreq: 'weekly',
   priority: 0.8,
-  sitemapSize: 5000,
+
+  exclude: [
+    '/admin',
+    '/checkout',
+    '/track',
+    '/ticket/*',
+    '/api/*',
+  ],
 
   robotsTxtOptions: {
-    additionalSitemaps: [
-      'https://www.natureofthedivine.com/sitemap.xml',
+    policies: [
+      { userAgent: '*', allow: '/' },
+      { userAgent: '*', disallow: ['/admin', '/api', '/checkout', '/ticket'] },
     ],
   },
 };

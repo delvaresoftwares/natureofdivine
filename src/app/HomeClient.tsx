@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { trackEvent } from "@/lib/actions";
 import { BOOK, HOME, HOME_FAQ, synopsis, authorBio, buyLinks, sampleChapters } from "@/lib/constants";
 import { BookImage } from "@/components/BookImage";
+import { ReviewsSection } from "@/components/ReviewsSection";
 import {
   Sparkles,
   ArrowRight,
@@ -204,6 +205,9 @@ export function HomeClient({ initialChapters }: { initialChapters: SampleChapter
           />
         </div>
       </section>
+
+      {/* REVIEWS */}
+      <ReviewsSection />
 
       {/* FAQ */}
       <section id="faq" className="scroll-mt-24 py-20 md:py-24 border-b border-slate-200 bg-white">
