@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import { FunnelDashboard } from './FunnelDashboard';
 
 export const metadata: Metadata = {
-  title: 'Admin Funnel Dashboard',
-  description: 'Conversion funnel analytics for "Nature of the Divine".',
+  title: 'Admin Dashboard',
+  description: 'Admin panel for "Nature of the Divine": conversion funnel analytics and order management.',
   robots: { index: false, follow: false },
 };
 

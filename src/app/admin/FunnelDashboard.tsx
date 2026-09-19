@@ -11,6 +11,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { Loader2, ArrowDown, Lock, TrendingUp, Eye, MousePointerClick, MapPin, CreditCard, CheckCircle2, IndianRupee, ShoppingBag, Newspaper } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { OrdersManager } from './OrdersManager';
 
 const STORAGE_KEY = 'notd_admin_unlocked';
 
@@ -63,7 +65,7 @@ export function FunnelDashboard() {
             <CardTitle className="text-2xl font-headline flex items-center gap-2">
               <Lock className="h-5 w-5 text-primary" /> Admin Access
             </CardTitle>
-            <CardDescription>Enter the passcode to view the funnel dashboard.</CardDescription>
+            <CardDescription>Enter the passcode to view the admin dashboard.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
@@ -83,7 +85,24 @@ export function FunnelDashboard() {
     );
   }
 
-  return <FunnelContent />;
+  return (
+    <Tabs defaultValue="funnel">
+      <div className="container mx-auto pt-6 md:pt-8 max-w-5xl">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="funnel">Funnel</TabsTrigger>
+          <TabsTrigger value="orders">Orders</TabsTrigger>
+        </TabsList>
+      </div>
+      <TabsContent value="funnel">
+        <FunnelContent />
+      </TabsContent>
+      <TabsContent value="orders">
+        <div className="container mx-auto py-10 md:py-14 max-w-5xl">
+          <OrdersManager />
+        </div>
+      </TabsContent>
+    </Tabs>
+  );
 }
 
 function FunnelContent() {
