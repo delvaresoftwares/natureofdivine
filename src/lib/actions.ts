@@ -2,11 +2,11 @@
 import { z } from 'zod';
 import { headers } from 'next/headers';
 import axios from 'axios';
-import { getOrdersByUserId, updateOrderStatus, addOrder, getOrderById, updateOrderPaymentStatus, getOrderByBookingId } from './order-store';
+import { getOrdersByUserId, updateOrderStatus, updateOrderShippingDetails, addOrder, getOrderById, updateOrderPaymentStatus, getOrderByBookingId, getOrders } from './order-store';
 import { revalidatePath } from 'next/cache';
 import { addLog } from './log-store';
 import { decreaseStock } from './stock-store';
-import { Order, SampleChapter } from './definitions';
+import { Order, OrderStatus, SampleChapter } from './definitions';
 import { getDiscount, incrementDiscountUsage } from './discount-store';
 import { addReview as addReviewToStore } from './review-store';
 import { v4 as uuidv4 } from 'uuid';
@@ -330,6 +330,53 @@ export async function checkPhonePeStatus(merchantTransactionId: string) {
 
 export async function fetchUserOrdersAction(userId: string) {
   return await getOrdersByUserId(userId);
+}
+
+export async function fetchOrdersAction(): Promise<Order[]> {
+  return await getOrders();
+}
+
+export async function changeOrderStatusAction(userId: string, orderId: string, status: OrderStatus) {
+  return await updateOrderStatus(userId, orderId, status);
+}
+
+export async function dispatchOrderAction(userId: string, orderId: string, carrier: string, trackingNumber: string) {
+  try {
+    await updateOrderStatus(userId, orderId, 'dispatched');
+    await updateOrderShippingDetails(userId, orderId, {
+      carrier,
+      trackingNumber,
+      service: 'Standard',
+      cost: 0,
+      labelUrl: null,
+    });
+    await addLog('info', `Order ${orderId} dispatched manually`, { carrier, trackingNumber });
+    return { success: true, message: 'Order dispatched successfully.' };
+  } catch (error: any) {
+    await addLog('error', 'dispatchOrderAction failed', { userId, orderId, error: error.message });
+    return { success: false, message: error.message || 'Failed to dispatch order.' };
+  }
+}
+
+export async function updateComboBookStatusAction(userId: string, orderId: string, itemIndex: number, subItemIndex: number, status: string) {
+  try {
+    const { updateComboItemStatus } = await import('./order-store');
+    await updateComboItemStatus(userId, orderId, itemIndex, subItemIndex, status);
+    return { success: true, message: 'Book status updated.' };
+  } catch (error: any) {
+    return { success: false, message: error.message };
+  }
+}
+
+export async function changeMultipleOrderStatusAction(orders: { orderId: string, userId: string }[], status: OrderStatus) {
+  try {
+    await Promise.all(orders.map(order => changeOrderStatusAction(order.userId, order.orderId, status)));
+    await addLog('info', `Bulk updated ${orders.length} orders to ${status}`);
+    return { success: true, message: `${orders.length} orders updated.` };
+  } catch (error: any) {
+    await addLog('error', 'Bulk order update failed', { status, count: orders.length, error: error.message });
+    return { success: false, message: 'Failed to update orders.' };
+  }
 }
 
 export async function fetchOrderByIdAction(userId: string, orderId: string) {
