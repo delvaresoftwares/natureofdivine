@@ -234,7 +234,6 @@ export function OrderForm({ stock, settings }: { stock: Stock, settings: SiteSet
 
     const placeOrderNow = async () => {
         setIsSubmitting(true);
-        dispatch({ type: 'SET_PROCESSING' });
 
         try {
             const payload = {
