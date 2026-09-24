@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useReducer, useState, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { placeOrder, validateDiscountCode, getBookingAction, trackEvent } from '@/lib/actions';
 import { Button } from '@/components/ui/button';
@@ -327,7 +328,8 @@ export function OrderForm({ stock, settings }: { stock: Stock, settings: SiteSet
     const currentItem = state.items[0];
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Form Area */}
             <div className="lg:col-span-2 space-y-6">
                 
@@ -549,6 +551,81 @@ export function OrderForm({ stock, settings }: { stock: Stock, settings: SiteSet
                         </div>
                     </div>
                 </div>
+            </div>
+            </div>
+
+            {/* Fullscreen Payment Gateway Loader */}
+            {isSubmitting && <PaymentGatewayLoader />}
+        </>
+    );
+}
+
+function PaymentGatewayLoader() {
+    return (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/95 backdrop-blur-sm">
+            <div className="flex flex-col items-center text-center px-6">
+                {/* Animated round loader */}
+                <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.45, ease: "easeOut" }}
+                    className="relative h-32 w-32"
+                >
+                    {/* Expanding pulse rings */}
+                    <motion.span
+                        className="absolute inset-0 rounded-full border-2 border-primary/40"
+                        animate={{ scale: [1, 1.3], opacity: [0.9, 0] }}
+                        transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
+                    />
+                    <motion.span
+                        className="absolute inset-0 rounded-full border-2 border-primary/25"
+                        animate={{ scale: [1, 1.55], opacity: [0.7, 0] }}
+                        transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut", delay: 0.45 }}
+                    />
+                    <motion.span
+                        className="absolute inset-0 rounded-full border-2 border-primary/15"
+                        animate={{ scale: [1, 1.8], opacity: [0.5, 0] }}
+                        transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut", delay: 0.9 }}
+                    />
+                    {/* Rotating ring */}
+                    <Loader2 className="absolute inset-0 h-full w-full animate-spin text-primary" strokeWidth={2.5} />
+                    {/* Center icon */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <motion.div
+                            animate={{ scale: [1, 1.08, 1] }}
+                            transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+                            className="h-16 w-16 rounded-full bg-white/10 border border-white/15 shadow-2xl shadow-primary/30 flex items-center justify-center"
+                        >
+                            <ShieldCheck className="h-8 w-8 text-white" />
+                        </motion.div>
+                    </div>
+                </motion.div>
+
+                <motion.p
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2, duration: 0.4 }}
+                    className="mt-10 text-xl md:text-2xl font-headline font-bold text-white"
+                >
+                    Loading payment gateway
+                </motion.p>
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.35, duration: 0.4 }}
+                    className="mt-2 flex items-center gap-1.5"
+                >
+                    <span className="text-sm text-white/60">Redirecting you to a secure payment page</span>
+                </motion.div>
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5, duration: 0.4 }}
+                    className="mt-6 flex items-center gap-1.5 text-xs tracking-wide uppercase text-white/40"
+                >
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                    Please do not refresh or close this window
+                </motion.div>
             </div>
         </div>
     );
