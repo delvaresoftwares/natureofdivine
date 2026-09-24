@@ -355,10 +355,10 @@ export const HOME = {
     byline: 'Alfas B',
     buyButton: 'Buy the Book',
     exploreButton: 'Explore the Wisdom',
-    priceSuffix: 'Paperback · Free shipping, everywhere',
+    priceSuffix: 'Paperback · Free shipping across India',
     features: [
       { icon: 'star', label: 'For the thinking seeker' },
-      { icon: 'truck', label: 'Free shipping, worldwide' },
+      { icon: 'truck', label: 'Free shipping across India' },
       { icon: 'shield', label: 'Paperback & Hardcover' },
     ],
   },
@@ -633,13 +633,6 @@ export const FOOTER = {
   brand: 'Nature of the Divine',
   tagline: 'A spiritual philosophy book exploring God, the soul journey, the guiding force of religion, and how to align with the divine through meditation and mindful living.',
   legalHeading: 'Legal & Support',
-  connect: 'Connect',
-  socials: [
-    { platform: 'Twitter', href: '#' },
-    { platform: 'Facebook', href: '#' },
-    { platform: 'Instagram', href: '#' },
-  ],
-  contactLabel: 'Email',
   rightsNote:
     'All content on this website, including the text of the book, is the intellectual property of its author.',
   designedBy: 'Crafted with care.',
@@ -786,7 +779,7 @@ Phone: ${SITE.phone}</p>
 <p>Payments are processed securely and may include Cash on Delivery (COD) or prepaid options such as UPI, cards, and net banking.</p>
 
 <h2>5. Shipping and Delivery</h2>
-<p>Shipping timelines and delivery estimates are provided on a best-effort basis. Refer to our Shipping Policy for full details, including free worldwide shipping on eligible orders.</p>
+<p>Shipping timelines and delivery estimates are provided on a best-effort basis. Refer to our Shipping Policy for full details, including free shipping across India on eligible orders.</p>
 <p>Delays caused by courier services or unforeseen events are beyond our control.</p>
 
 <h2>6. Returns and Refunds</h2>
@@ -818,7 +811,7 @@ Phone: ${SITE.phone}</p>
 <p>At Nature of the Divine, we are committed to delivering your copy of the spiritual book <em>"Nature of the Divine"</em> in a timely and secure manner. Please read our shipping policy for details on how and when your order will be delivered.</p>
 
 <h2>Shipping Coverage</h2>
-<p>We currently ship across India with free worldwide shipping also available on eligible orders. If your location is not serviceable, we will inform you promptly after order placement.</p>
+<p>We currently ship across India with free shipping on eligible orders. If a location is not serviceable, we will inform you promptly after order placement.</p>
 
 <h2>Processing Time</h2>
 <p>All orders are processed within 1–3 business days after receiving payment confirmation (or after order placement for Cash on Delivery).</p>
