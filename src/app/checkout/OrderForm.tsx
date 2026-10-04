@@ -18,8 +18,6 @@ import { useLocation } from '@/hooks/useLocation';
 import { z } from 'zod';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { countries } from '@/lib/countries';
 import type { SiteSettings } from '@/lib/definitions';
 import { books } from '@/lib/data';
 
@@ -389,17 +387,13 @@ export function OrderForm({ stock, settings }: { stock: Stock, settings: SiteSet
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="country" className="text-xs uppercase tracking-widest text-muted-foreground ml-1">Country</Label>
-                                    <Select 
-                                        value={state.details.country} 
-                                        onValueChange={(v) => dispatch({ type: 'SET_FORM_VALUE', payload: { field: 'country', value: v } })}
-                                    >
-                                        <SelectTrigger className="h-12 rounded-xl">
-                                            <SelectValue placeholder="Select Country" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {countries.map(c => <SelectItem key={c.iso2} value={c.iso2}>{c.name}</SelectItem>)}
-                                        </SelectContent>
-                                    </Select>
+                                    <Input
+                                        id="country"
+                                        value="India"
+                                        disabled
+                                        readOnly
+                                        className="h-12 rounded-xl"
+                                    />
                                 </div>
                             </div>
                             
